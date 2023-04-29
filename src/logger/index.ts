@@ -34,7 +34,7 @@ const logFlareTransport = (props) => {
       })
     }
   } catch (err) {
-    return () => { }
+    return () => {}
   }
 }
 
