@@ -15,8 +15,10 @@ const levelNumberToNameMap = {
   fatal: 6,
 }
 
+const type = window.location.hostname === 'localhost' ? 'pretty' : 'hidden'
+
 export const logger = new Logger({
-  type: window.location.hostname === 'localhost' ? 'pretty' : 'hidden',
+  type,
   minLevel: levelNumberToNameMap[logLevel],
   hideLogPositionForProduction: true,
 })
@@ -34,13 +36,20 @@ const logFlareTransport = (props) => {
       })
     }
   } catch (err) {
-    return () => {}
+    return () => {
+      logger.error('Logflare transport error', err)
+    }
   }
 }
 
-logger.attachTransport(
-  logFlareTransport({
-    LOGFLARE_KEY: getConfigurationOption('REACT_APP_LOGFLARE_KEY', ''),
-    LOGFLARE_SOURCE: getConfigurationOption('REACT_APP_LOGFLARE_SOURCE', ''),
-  }),
-)
+if (
+  getConfigurationOption('REACT_APP_LOGFLARE_KEY', '') &&
+  getConfigurationOption('REACT_APP_LOGFLARE_SOURCE', '')
+) {
+  logger.attachTransport(
+    logFlareTransport({
+      LOGFLARE_KEY: getConfigurationOption('REACT_APP_LOGFLARE_KEY', ''),
+      LOGFLARE_SOURCE: getConfigurationOption('REACT_APP_LOGFLARE_SOURCE', ''),
+    }),
+  )
+}
